@@ -78,13 +78,20 @@ pub struct LiquidateTroves<'info> {
     /// Clock sysvar for timestamp validation
     pub clock: Sysvar<'info, Clock>,
 
+    #[account(
+        init_if_needed,
+        payer = liquidator,
+        space = 8 + StabilityPoolSnapshot::LEN,
+        seeds = [b"stability_pool_snapshot", params.collateral_denom.as_bytes()],
+        bump
+    )]
+    pub stability_pool_snapshot: Account<'info, StabilityPoolSnapshot>,
+
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     
     // remaining_accounts should contain:
-    // - First 4*N accounts: Per-trove accounts (UserDebtAmount, UserCollateralAmount, LiquidityThreshold, Node)
-    // - Remaining accounts: TotalLiquidationCollateralGain PDAs (one per unique denom being liquidated)
-    //   These PDAs track seized collateral for distribution to stability pool stakers
+    // - 4*N accounts: Per-trove accounts (UserDebtAmount, UserCollateralAmount, LiquidityThreshold, TokenAccount)
 }
 
 pub fn handler(ctx: Context<LiquidateTroves>, params: LiquidateTrovesParams) -> Result<()> {
@@ -118,6 +125,16 @@ pub fn handler(ctx: Context<LiquidateTroves>, params: LiquidateTrovesParams) -> 
     // Validate remaining accounts for each user
     validate_remaining_accounts(&params.liquidation_list, &ctx.remaining_accounts)?;
     
+    // Initialize StabilityPoolSnapshot if it's newly created
+    let snapshot = &mut ctx.accounts.stability_pool_snapshot;
+    if snapshot.denom.is_empty() {
+        snapshot.denom = params.collateral_denom.clone();
+        snapshot.s_factor = 0;
+        snapshot.total_collateral_gained = 0;
+        snapshot.epoch = 0;
+        msg!("Initialized new StabilityPoolSnapshot for {}", params.collateral_denom);
+    }
+    
     // Create context structs for clean architecture
     let mut liquidation_ctx = LiquidationContext {
         liquidator: ctx.accounts.liquidator.clone(),
@@ -143,6 +160,7 @@ pub fn handler(ctx: Context<LiquidateTroves>, params: LiquidateTrovesParams) -> 
         &oracle_ctx,
         params.liquidation_list.clone(),
         &ctx.remaining_accounts,
+        &mut ctx.accounts.stability_pool_snapshot,
     )?;
 
     // Update the actual accounts with the results

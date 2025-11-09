@@ -94,13 +94,17 @@ pub struct LiquidateTrove<'info> {
 
     pub clock: Sysvar<'info, Clock>,
 
+    #[account(
+        init_if_needed,
+        payer = liquidator,
+        space = 8 + StabilityPoolSnapshot::LEN,
+        seeds = [b"stability_pool_snapshot", params.collateral_denom.as_bytes()],
+        bump
+    )]
+    pub stability_pool_snapshot: Account<'info, StabilityPoolSnapshot>,
+
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
-    
-    // remaining_accounts should contain:
-    // - StabilityPoolSnapshot PDA for the collateral denomination (at index 0)
-    //   Seeds: [b"stability_pool_snapshot", collateral_denom.as_bytes()]
-    // This PDA is required to update S factor for liquidation gains distribution
 }
 
 pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Result<()> {
@@ -171,43 +175,27 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
         .total_debt_amount
         .saturating_sub(debt_amount);
 
-    // Validate that StabilityPoolSnapshot PDA is provided in remaining_accounts[0]
-    // This is required for the Product-Sum algorithm to update S factors
-    require!(
-        !ctx.remaining_accounts.is_empty(),
-        AerospacerProtocolError::MissingSnapshotAccount
-    );
-    
-    let snapshot_seeds = [
-        b"stability_pool_snapshot",
-        params.collateral_denom.as_bytes(),
-    ];
-    let (expected_snapshot_pda, _bump) = Pubkey::find_program_address(&snapshot_seeds, &crate::ID);
-    
-    let snapshot_account = &ctx.remaining_accounts[0];
-    require!(
-        snapshot_account.key() == expected_snapshot_pda,
-        AerospacerProtocolError::InvalidSnapshotAccount
-    );
-    
-    msg!("Validated StabilityPoolSnapshot PDA: {}", expected_snapshot_pda);
+    // Initialize StabilityPoolSnapshot if it's newly created
+    let snapshot = &mut ctx.accounts.stability_pool_snapshot;
+    if snapshot.denom.is_empty() {
+        snapshot.denom = params.collateral_denom.clone();
+        snapshot.s_factor = 0;
+        snapshot.total_collateral_gained = 0;
+        snapshot.epoch = 0;
+        msg!("Initialized new StabilityPoolSnapshot for {}", params.collateral_denom);
+    }
 
     // Distribute liquidation gains to stakers using Product-Sum algorithm
     // This updates:
     // - P factor (pool depletion tracking)
     // - total_stake_amount (reduced by debt_amount)
     // - S factors (collateral rewards per denomination)
-    // - StabilityPoolSnapshot PDAs
-    //
-    // For single trove liquidation:
-    // - num_troves = 0 (since we don't pass trove accounts in remaining_accounts)
-    // - remaining_accounts[0] = StabilityPoolSnapshot PDA for the collateral denom
+    // - StabilityPoolSnapshot account
     distribute_liquidation_gains_to_stakers(
         &mut ctx.accounts.state,
         &collateral_amounts,
         debt_amount,
-        &ctx.remaining_accounts,
-        0, // num_troves = 0 for single liquidation (no trove accounts in remaining_accounts)
+        &mut ctx.accounts.stability_pool_snapshot,
     )?;
 
     msg!(

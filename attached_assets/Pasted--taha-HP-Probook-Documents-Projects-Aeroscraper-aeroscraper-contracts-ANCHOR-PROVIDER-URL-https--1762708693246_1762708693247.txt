@@ -1,0 +1,139 @@
+
+taha@HP-Probook:~/Documents/Projects/Aeroscraper/aeroscraper-contracts$ ANCHOR_PROVIDER_URL=https://devnet.helius-rpc.com/?api-key=e153d2eb-e16c-4b9d-a369-c418cfff8e13 ANCHOR_WALLET=~/.config/solana/id.json npx ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/protocol-liquidation.ts'
+(node:711933) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/tests/protocol-liquidation.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+  Protocol Contract - Liquidation Tests
+
+🚀 Setting up Liquidation Tests for devnet...
+🚀 Setting up test environment for devnet...
+✅ Using existing stablecoin mint: GnasBgv2aBS97fUDGXGcseCQcXT9tGoKG9R49SDDyMMM
+✅ Using existing devnet collateral mint from vault: Hygyfy8RBxLvoz5b3ffsg9PAvEkT3BJXXdTpVu6ftZYz
+✅ Oracle already initialized
+✅ Fees already initialized
+✅ Protocol already initialized
+✅ FeeAddress1 already funded: 10.900000013 SOL
+✅ FeeAddress2 already funded: 10.900000032 SOL
+✅ FeeAddress1 token account already exists: GqY4SbdRG4vudGatbLN4d6yfnXXPzPrHDJBKWbgonxQq
+✅ FeeAddress2 token account already exists: Hn5V9cYLmZDPwXQcp4vc6VMDzVatpBZBmmwNGXDNj6Cq
+📊 Admin balance: 28.679831207 SOL
+📊 Liquidator balance: 0.01 SOL
+✅ Liquidator already has sufficient balance
+✅ Liquidation test setup complete
+    Test 4.1: Query Liquidatable Troves
+📋 Querying liquidatable troves...
+  Found 14 liquidatable trove(s) out of 57 total
+  Trove owner: 7uaVocMoCPCCR6tfwXvhg6dE8TZ6UiVjxL5NDxnzrDcF, ICR: 44152867%
+  Trove owner: 7Mx9GjN7xMhVLhMwJLKDt6QZZZMxc4tSqvDDbiff1NS1, ICR: 29435245%
+  Trove owner: HU4Ju9Mo2WNo1HKCTaHXghDQNGeGoTLqVaAzYYQpw5ur, ICR: 14717622%
+  Trove owner: Cm6dZEhTaKRu9FWwqm3sSsUT4Tp6H1g6a1ebbVSGRzys, ICR: 44152867%
+  Trove owner: BGWywYvYFkMLbQZ9mb9oR8w6x8LUisdBc1zUj8BeLnW1, ICR: 44152867%
+  Trove owner: 64QbRnuLeUXEP3t1yzj8RxwroBKmoEidYvoMKge9GzEr, ICR: 29435245%
+  Trove owner: CGFpSafEqT2ztVWZL8dJSGhzsVxwc1urpNK9UgV7AunS, ICR: 29435245%
+  Trove owner: 21AJoYVPj3TZbY2De3GfTVAtecsUHQ9oLUVoQNepssN5, ICR: 91054613%
+  Trove owner: GBwe7hZor3Po53qycpwQiSamKcqM3rt2FyzSVroeiPLa, ICR: 44152867%
+  Trove owner: BAYrNA95bLF4ktQCroxkW68L7C4rJfaDCiFGAnpPyHWq, ICR: 29435245%
+  Trove owner: GwBQG3Ef7rWL6s7UAUCTM16ayi3JqaJNqgXgFWkUMWi2, ICR: 29435245%
+  Trove owner: D6SXExNwDj8AjWF3wPbqiJcAsByPZEwZM3c6rFhirnzi, ICR: 29435245%
+  Trove owner: 7YkW6FCB4yppgiaMAv2EWzRVnnF6Tx6bBQ7QSjse1JNY, ICR: 29435245%
+  Trove owner: HCwVC9DU1fGwzfvTCb5wqqGBVHX5bnzHWvkUTvHNryXk, ICR: 29435245%
+✅ Liquidation query functional test passed
+      ✔ Should identify undercollateralized troves (47510ms)
+    Test 4.2: Liquidate Single Undercollateralized Trove
+      - Should liquidate trove when ICR falls below MCR
+    Test 4.3: Liquidate Multiple Troves in Batch
+📋 Testing batch liquidation...
+  ✅ Batch liquidation supports up to 50 troves
+  ✅ Remaining accounts pattern for scalability
+  ✅ liquidateTrovesHelper function structured for batch operations
+✅ Batch liquidation capability verified
+      ✔ Should liquidate multiple troves efficiently
+    Single Trove Liquidation (liquidate_trove)
+📋 Starting single trove liquidation (liquidate_trove) test...
+  Found liquidatable trove: 7uaVocMoCPCCR6tfwXvhg6dE8TZ6UiVjxL5NDxnzrDcF, ICR: 44.152867%
+targetDebt <BN: d2f13f7789f0000>
+  Protocol stablecoin vault balance before funding: 950000000000000000
+  Admin (stability pool owner) aUSD balance: 3291110000000000000
+  ✅ Protocol stablecoin vault already holds sufficient aUSD to burn the debt.
+  Stability pool snapshot account: missing
+  Protocol stablecoin vault balance after funding: 950000000000000000
+  ⚠️ Stability pool snapshot account is missing or uninitialized on devnet; skipping liquidation assertions.
+    • PDA: BEwMweTRphLp3bDKtjsf8diZi9iQ1crY4E4jZ9ggQybK
+    • Please initialize the stability pool snapshot PDA before re-running this test.
+      1) Should liquidate a single undercollateralized trove using named accounts
+    Test 4.4: Liquidation with Stability Pool Coverage
+📋 Testing stability pool coverage...
+  ✅ Debt burned from stability pool
+  ✅ Collateral distributed to stakers via S factor
+  ✅ P factor decreases (depletion tracking)
+  ✅ S factor increases (gains tracking)
+✅ Stability pool liquidation path structure verified
+      ✔ Should use stability pool to cover liquidated debt
+    Test 4.5: Liquidation without Stability Pool
+📋 Testing liquidation without stability pool...
+  ⚠️ Note: Redistribution path not yet implemented in contract
+  ✅ Would fall back to redistribution mechanism if implemented
+  ✅ Would redistribute debt to other troves
+✅ Redistribution mechanism structure verified
+      ✔ Should handle liquidation when stability pool is empty
+    Test 4.6: Collateral Distribution to Stakers
+📋 Testing collateral distribution...
+  ✅ Distribution calculated via S factor = s_factor formula
+  ✅ S factor tracks cumulative gains per denom
+  ✅ Snapshot-based fair distribution (Product-Sum algorithm)
+  ✅ UserCollateralSnapshot PDA per user+denom tracks withdrawals
+✅ Distribution mechanism structure verified
+      ✔ Should distribute liquidated collateral proportionally
+    Test 4.7: Debt Burning from Stability Pool
+📋 Testing debt burning...
+  ✅ total_stake_amount decreases by liquidated debt
+  ✅ P factor updated (depletion: P_current < P_snapshot)
+  ✅ Epoch increments when P factor < 10^9
+  ✅ UserStakeAmount stores P snapshot for compounded stake
+✅ Debt burning mechanism structure verified
+      ✔ Should burn aUSD debt from stability pool
+    Test 4.8: Withdraw Liquidation Gains
+📋 Testing liquidation gains withdrawal...
+  ✅ StabilityPoolSnapshot PDA: BEwMweTRphLp3bDKtjsf8diZi9iQ1crY4E4jZ9ggQybK
+  ✅ withdraw_liquidation_gains instruction accepts collateral_denom
+  ✅ Calculates gains using S factor snapshot mechanism
+  ✅ Transfers collateral from protocol vault to user
+  ✅ Updates S snapshot to prevent double-spending
+✅ Liquidation gains withdrawal structure verified
+      ✔ Should withdraw collateral gains to stakers
+    Test 4.9: ICR Calculation Accuracy
+📋 Testing ICR calculation...
+  ✅ ICR = (collateral_value / debt_value) * 100
+  ✅ Uses real-time Pyth Network oracle prices via oracle helper
+  ✅ Minimum ICR = 115% for opening troves
+  ✅ Liquidation threshold = 110%
+  ✅ Multi-collateral support via denom parameter
+✅ ICR calculation structure verified
+      ✔ Should calculate Individual Collateral Ratio correctly
+    Test 4.10: Sorted Troves Update After Liquidation
+📋 Testing sorted troves update...
+  ✅ Off-chain sorting architecture used
+  ✅ Liquidated troves have debt = 0 (effectively closed)
+  ✅ LiquidityThreshold accounts remain for tracking
+  ✅ getProgramAccounts will exclude closed troves (debt = 0)
+✅ Off-chain sorted list integrity maintained
+      ✔ Should maintain sorted troves integrity after liquidation
+
+
+  9 passing (2m)
+  1 pending
+  1 failing
+
+  1) Protocol Contract - Liquidation Tests
+       Single Trove Liquidation (liquidate_trove)
+         Should liquidate a single undercollateralized trove using named accounts:
+     Error: AnchorError occurred. Error Code: AccountDidNotSerialize. Error Number: 3004. Error Message: Failed to serialize the account.
+      at Function.parse (node_modules/@coral-xyz/anchor/src/error.ts:136:14)
+      at translateError (node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+      at MethodsBuilder.rpc [as _rpcFn] (node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+
