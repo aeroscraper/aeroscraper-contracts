@@ -171,6 +171,27 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
         .total_debt_amount
         .saturating_sub(debt_amount);
 
+    // Validate that StabilityPoolSnapshot PDA is provided in remaining_accounts[0]
+    // This is required for the Product-Sum algorithm to update S factors
+    require!(
+        !ctx.remaining_accounts.is_empty(),
+        AerospacerProtocolError::MissingSnapshotAccount
+    );
+    
+    let snapshot_seeds = [
+        b"stability_pool_snapshot",
+        params.collateral_denom.as_bytes(),
+    ];
+    let (expected_snapshot_pda, _bump) = Pubkey::find_program_address(&snapshot_seeds, &crate::ID);
+    
+    let snapshot_account = &ctx.remaining_accounts[0];
+    require!(
+        snapshot_account.key() == expected_snapshot_pda,
+        AerospacerProtocolError::InvalidSnapshotAccount
+    );
+    
+    msg!("Validated StabilityPoolSnapshot PDA: {}", expected_snapshot_pda);
+
     // Distribute liquidation gains to stakers using Product-Sum algorithm
     // This updates:
     // - P factor (pool depletion tracking)

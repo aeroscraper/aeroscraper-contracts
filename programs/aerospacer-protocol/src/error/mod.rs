@@ -80,4 +80,10 @@ pub enum AerospacerProtocolError {
     
     #[msg("Invalid snapshot")]
     InvalidSnapshot,
+    
+    #[msg("Missing snapshot account in remaining_accounts")]
+    MissingSnapshotAccount,
+    
+    #[msg("Invalid snapshot account - does not match expected PDA")]
+    InvalidSnapshotAccount,
 }
