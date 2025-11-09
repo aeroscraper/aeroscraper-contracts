@@ -38,6 +38,17 @@ Then you can run:
 - Subsequent builds use incremental compilation and are much faster
 - See the "Project Info" workflow output for additional helpful information
 
+## Recent Changes
+
+### November 9, 2025 - Liquidation Refactoring
+**Eliminated `remaining_accounts` Pattern from Liquidation Instructions:**
+- Replaced manual PDA validation with Anchor's `init_if_needed` pattern for `StabilityPoolSnapshot` accounts
+- Added `stability_pool_snapshot` as a regular account parameter in both `liquidate_trove` and `liquidate_troves` instructions
+- Simplified `distribute_liquidation_gains_to_stakers` function by removing PDA searching logic (~60 lines eliminated)
+- Auto-initialization: StabilityPoolSnapshot PDA is created automatically on first liquidation per collateral denomination
+- **Benefits**: Cleaner code, type-safe accounts, automatic rent handling, eliminates manual PDA validation
+- **Testing**: Code compiles successfully with `cargo check` - ready for integration testing
+
 ## User Preferences
 *This section will be updated as you work with the project*
 
