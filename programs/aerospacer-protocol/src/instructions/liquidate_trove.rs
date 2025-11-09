@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Token, TokenAccount, Mint, Burn};
 use crate::state::*;
 use crate::error::*;
-use crate::oracle::{self, OracleContext, PriceCalculator};
+use crate::oracle::{OracleContext, PriceCalculator};
 use crate::trove_management::distribute_liquidation_gains_to_stakers;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
