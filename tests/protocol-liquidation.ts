@@ -554,6 +554,12 @@ describe("Protocol Contract - Liquidation Tests", () => {
       //   .signers([user1])
       //   .rpc();
 
+      // Derive StabilityPoolSnapshot PDA for SOL
+      const [stabilityPoolSnapshotPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("stability_pool_snapshot"), Buffer.from("SOL")],
+        ctx.protocolProgram.programId
+      );
+
       // Step 3: Call the liquidate_trove instruction from liquidator
       await ctx.protocolProgram.methods
         .liquidateTrove({
@@ -581,6 +587,13 @@ describe("Protocol Contract - Liquidation Tests", () => {
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         } as any)
+        .remainingAccounts([
+          {
+            pubkey: stabilityPoolSnapshotPda,
+            isSigner: false,
+            isWritable: true,
+          },
+        ])
         .signers([liquidator])
         .rpc();
 
