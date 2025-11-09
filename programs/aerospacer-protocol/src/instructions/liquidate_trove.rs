@@ -3,6 +3,7 @@ use anchor_spl::token::{Token, TokenAccount, Mint, Burn};
 use crate::state::*;
 use crate::error::*;
 use crate::oracle::{self, OracleContext, PriceCalculator};
+use crate::trove_management::distribute_liquidation_gains_to_stakers;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct LiquidateTroveParams {
@@ -95,6 +96,11 @@ pub struct LiquidateTrove<'info> {
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    
+    // remaining_accounts should contain:
+    // - StabilityPoolSnapshot PDA for the collateral denomination (at index 0)
+    //   Seeds: [b"stability_pool_snapshot", collateral_denom.as_bytes()]
+    // This PDA is required to update S factor for liquidation gains distribution
 }
 
 pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Result<()> {
@@ -149,34 +155,46 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
     );
     anchor_spl::token::burn(burn_ctx, debt_amount)?;
 
+    // Build collateral_amounts vector for distribution function
+    let collateral_amount = coll_info.amount;
+    let collateral_amounts = vec![(params.collateral_denom.clone(), collateral_amount)];
+    
     // Zero user trove data (effectively liquidated)
     ctx.accounts.user_debt_amount.amount = 0;
     ctx.accounts.user_collateral_amount.amount = 0;
     ctx.accounts.liquidity_threshold.ratio = 0;
 
-    // Deplete stability pool stake by burned amount
-    ctx.accounts.state.total_stake_amount = ctx
-        .accounts
-        .state
-        .total_stake_amount
-        .saturating_sub(debt_amount);
-
-    // Update global state
+    // Update global debt
     ctx.accounts.state.total_debt_amount = ctx
         .accounts
         .state
         .total_debt_amount
         .saturating_sub(debt_amount);
 
-    // NOTE: For minimal version, we do not transfer seized collateral out of protocol vault
-    // nor update S snapshot here. That can be added by exposing an optional
-    // stability_pool_snapshot account and applying the snapshot algorithm.
+    // Distribute liquidation gains to stakers using Product-Sum algorithm
+    // This updates:
+    // - P factor (pool depletion tracking)
+    // - total_stake_amount (reduced by debt_amount)
+    // - S factors (collateral rewards per denomination)
+    // - StabilityPoolSnapshot PDAs
+    //
+    // For single trove liquidation:
+    // - num_troves = 0 (since we don't pass trove accounts in remaining_accounts)
+    // - remaining_accounts[0] = StabilityPoolSnapshot PDA for the collateral denom
+    distribute_liquidation_gains_to_stakers(
+        &mut ctx.accounts.state,
+        &collateral_amounts,
+        debt_amount,
+        &ctx.remaining_accounts,
+        0, // num_troves = 0 for single liquidation (no trove accounts in remaining_accounts)
+    )?;
 
     msg!(
-        "Single trove liquidated: user={}, denom={}, debt_liquidated={}",
+        "Single trove liquidated successfully: user={}, denom={}, debt={}, collateral={}",
         params.target_user,
         params.collateral_denom,
-        debt_amount
+        debt_amount,
+        collateral_amount
     );
 
     Ok(())

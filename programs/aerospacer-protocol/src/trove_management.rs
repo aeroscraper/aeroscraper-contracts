@@ -670,7 +670,7 @@ fn update_user_accounts_after_liquidation(
 /// * `debt_amount` - The debt amount that was liquidated (burned from pool)
 /// * `remaining_accounts` - Must include StabilityPoolSnapshot PDAs after the 4n trove accounts
 /// * `num_troves` - Number of troves being liquidated (to calculate where snapshot PDAs start)
-fn distribute_liquidation_gains_to_stakers(
+pub fn distribute_liquidation_gains_to_stakers(
     state: &mut StateAccount,
     collateral_amounts: &Vec<(String, u64)>,
     debt_amount: u64,
