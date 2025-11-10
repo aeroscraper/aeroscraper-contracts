@@ -40,6 +40,25 @@ Then you can run:
 
 ## Recent Changes
 
+### November 10, 2025 - Critical Debt Accounting Fix & Sorted List Validation
+**Fixed Critical Under-Collateralization Bug in borrow_loan:**
+- **Issue**: borrow_loan was recording net_loan_amount as debt but minting params.loan_amount (gross), creating unbacked tokens
+- **Example**: Borrowing 1000 aUSD with 5% fee minted 1000 tokens but only recorded 950 as debt → 50 unbacked tokens
+- **Fix**: Changed TroveManager::borrow_loan to use params.loan_amount (gross amount) for debt accounting
+- **Impact**: All minted tokens now have matching debt liability; system-wide total_debt_amount equals stablecoin supply
+- **Security**: Eliminates supply/debt divergence that could enable protocol-draining exploits
+
+**Added Neighbor Hint Validation to repay_loan:**
+- Implemented ICR ordering validation when neighbor hints provided via remaining_accounts
+- Mirrors borrow_loan's PDA verification and sorted list integrity checks
+- Prevents sorted list corruption from malicious or incorrect repayment operations
+- Production clients MUST provide neighbor hints for both borrow and repay operations
+
+**Production Status:** ✅ **BOTH INSTRUCTIONS PRODUCTION-READY**
+- Architect review confirms no accounting exploits or security issues
+- Debt and supply remain in lockstep across all operations
+- Sorted list invariants enforced on all ICR-changing operations
+
 ### November 10, 2025 - Production-Ready Redistribution Mechanism
 **Implemented Complete Hybrid Liquidation System:**
 - **Redistribution Path Added**: When stability pool is empty/insufficient, debt and collateral are redistributed to active troves (Liquity-style)
