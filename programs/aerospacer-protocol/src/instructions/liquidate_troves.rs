@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, Mint};
+use anchor_spl::token::{Token, Mint, TokenAccount};
 use crate::state::*;
 use crate::error::*;
 use crate::trove_management::*;
@@ -123,7 +123,7 @@ pub fn handler(ctx: Context<LiquidateTroves>, params: LiquidateTrovesParams) -> 
     msg!("Liquidation by: {}", ctx.accounts.liquidator.key());
     
     // Validate remaining accounts for each user
-    validate_remaining_accounts(&params.liquidation_list, &ctx.remaining_accounts)?;
+    validate_remaining_accounts(&params.liquidation_list, &ctx.remaining_accounts, &params.collateral_denom)?;
     
     // Initialize StabilityPoolSnapshot if it's newly created
     let snapshot = &mut ctx.accounts.stability_pool_snapshot;
@@ -187,6 +187,7 @@ pub fn handler(ctx: Context<LiquidateTroves>, params: LiquidateTrovesParams) -> 
 fn validate_remaining_accounts(
     liquidation_list: &[Pubkey],
     remaining_accounts: &[AccountInfo],
+    collateral_denom: &str,
 ) -> Result<()> {
     let expected_count = liquidation_list.len() * 4;
     
@@ -203,7 +204,7 @@ fn validate_remaining_accounts(
         validate_user_debt_account(&remaining_accounts[account_start], user)?;
         
         // Validate UserCollateralAmount account
-        validate_user_collateral_account(&remaining_accounts[account_start + 1], user)?;
+        validate_user_collateral_account(&remaining_accounts[account_start + 1], user, collateral_denom)?;
         
         // Validate LiquidityThreshold account
         validate_liquidity_threshold_account(&remaining_accounts[account_start + 2], user)?;
@@ -239,7 +240,7 @@ fn validate_user_debt_account(account_info: &AccountInfo, expected_user: &Pubkey
 }
 
 /// Validate UserCollateralAmount account
-fn validate_user_collateral_account(account_info: &AccountInfo, expected_user: &Pubkey) -> Result<()> {
+fn validate_user_collateral_account(account_info: &AccountInfo, expected_user: &Pubkey, expected_denom: &str) -> Result<()> {
     require!(
         account_info.owner == &crate::ID,
         AerospacerProtocolError::Unauthorized
@@ -256,6 +257,11 @@ fn validate_user_collateral_account(account_info: &AccountInfo, expected_user: &
     require!(
         user_collateral_amount.owner == *expected_user,
         AerospacerProtocolError::Unauthorized
+    );
+    
+    require!(
+        user_collateral_amount.denom == expected_denom,
+        AerospacerProtocolError::InvalidAmount
     );
     
     Ok(())
@@ -285,9 +291,17 @@ fn validate_liquidity_threshold_account(account_info: &AccountInfo, expected_use
 }
 
 /// Validate TokenAccount
-fn validate_token_account(account_info: &AccountInfo, _expected_user: &Pubkey) -> Result<()> {
+fn validate_token_account(account_info: &AccountInfo, expected_user: &Pubkey) -> Result<()> {
     require!(
         account_info.owner == &anchor_spl::token::ID,
+        AerospacerProtocolError::Unauthorized
+    );
+    
+    let account_data = account_info.try_borrow_data()?;
+    let token_account = TokenAccount::try_deserialize(&mut &account_data[..])?;
+    
+    require!(
+        token_account.owner == *expected_user,
         AerospacerProtocolError::Unauthorized
     );
     

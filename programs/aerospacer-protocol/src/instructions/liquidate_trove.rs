@@ -143,21 +143,10 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
     // Use micro-percent threshold (110% = 110_000_000)
     require!(current_icr < 110_000_000, AerospacerProtocolError::CollateralBelowMinimum);
 
-    // Burn stablecoin from protocol vault (PDA signer)
+    // Prepare PDA signer for potential burn operations
     let (_pda, bump) = Pubkey::find_program_address(&[b"protocol_stablecoin_vault"], &crate::ID);
     let vault_seeds: &[&[u8]] = &[b"protocol_stablecoin_vault", &[bump]];
     let signer: &[&[&[u8]]] = &[vault_seeds];
-
-    let burn_ctx = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        Burn {
-            mint: ctx.accounts.stable_coin_mint.to_account_info(),
-            from: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
-            authority: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
-        },
-        signer,
-    );
-    anchor_spl::token::burn(burn_ctx, debt_amount)?;
 
     // Build collateral_amounts vector for distribution function
     let collateral_amount = coll_info.amount;
@@ -167,13 +156,6 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
     ctx.accounts.user_debt_amount.amount = 0;
     ctx.accounts.user_collateral_amount.amount = 0;
     ctx.accounts.liquidity_threshold.ratio = 0;
-
-    // Update global debt
-    ctx.accounts.state.total_debt_amount = ctx
-        .accounts
-        .state
-        .total_debt_amount
-        .saturating_sub(debt_amount);
 
     // Initialize StabilityPoolSnapshot if it's newly created
     let snapshot = &mut ctx.accounts.stability_pool_snapshot;
@@ -189,9 +171,26 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
     let total_stake = ctx.accounts.state.total_stake_amount;
     
     if total_stake >= debt_amount {
-        // PATH 1: Stability pool has sufficient funds
-        // Distribute liquidation gains to stakers using Product-Sum algorithm
+        // PATH 1: Stability pool has sufficient funds - burn entire debt
         msg!("Using stability pool liquidation path (sufficient funds)");
+        
+        let burn_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            Burn {
+                mint: ctx.accounts.stable_coin_mint.to_account_info(),
+                from: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
+                authority: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
+            },
+            signer,
+        );
+        anchor_spl::token::burn(burn_ctx, debt_amount)?;
+        
+        ctx.accounts.state.total_debt_amount = ctx
+            .accounts
+            .state
+            .total_debt_amount
+            .saturating_sub(debt_amount);
+        
         distribute_liquidation_gains_to_stakers(
             &mut ctx.accounts.state,
             &collateral_amounts,
@@ -199,12 +198,29 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
             &mut ctx.accounts.stability_pool_snapshot,
         )?;
     } else if total_stake > 0 {
-        // PATH 2: Partial coverage - use stability pool for what it can cover, redistribute the rest
+        // PATH 2: Partial coverage - burn only covered portion, redistribute the rest
         msg!("Using hybrid liquidation path (partial stability pool coverage)");
         msg!("  Pool covers: {} of {} debt", total_stake, debt_amount);
         
         let covered_debt = total_stake;
         let uncovered_debt = debt_amount.saturating_sub(total_stake);
+        
+        let burn_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            Burn {
+                mint: ctx.accounts.stable_coin_mint.to_account_info(),
+                from: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
+                authority: ctx.accounts.protocol_stablecoin_vault.to_account_info(),
+            },
+            signer,
+        );
+        anchor_spl::token::burn(burn_ctx, covered_debt)?;
+        
+        ctx.accounts.state.total_debt_amount = ctx
+            .accounts
+            .state
+            .total_debt_amount
+            .saturating_sub(covered_debt);
         
         let covered_collateral = (collateral_amount as u128)
             .checked_mul(covered_debt as u128)
@@ -230,7 +246,7 @@ pub fn handler(ctx: Context<LiquidateTrove>, params: LiquidateTroveParams) -> Re
             redistributed_collateral,
         )?;
     } else {
-        // PATH 3: Stability pool is empty - redistribute to all active troves
+        // PATH 3: Stability pool is empty - NO BURN, redistribute to all active troves
         msg!("Using redistribution liquidation path (stability pool empty)");
         use crate::trove_management::redistribute_debt_and_collateral;
         redistribute_debt_and_collateral(
