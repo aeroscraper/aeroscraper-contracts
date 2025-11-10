@@ -102,10 +102,22 @@ pub fn handler(ctx: Context<DistributeFee>, params: DistributeFeeParams) -> Resu
         msg!("Fees distributed to stability pool successfully: {}", fee_amount);
     } else {
         // Validate fee address token account owners using state values
+        // Note: ctx.accounts.fee_address_1_token_account.owner refers to the TOKEN ACCOUNT's owner field
+        // (the wallet that owns the tokens), not the account's program owner (which is always Token Program)
+        
+        msg!("Validating fee address 1 token account owner");
+        msg!("Expected owner: {}", state.fee_address_1);
+        msg!("Actual owner: {}", ctx.accounts.fee_address_1_token_account.owner);
+        
         require!(
             ctx.accounts.fee_address_1_token_account.owner == state.fee_address_1,
             AerospacerFeesError::InvalidFeeAddress1
         );
+        
+        msg!("Validating fee address 2 token account owner");
+        msg!("Expected owner: {}", state.fee_address_2);
+        msg!("Actual owner: {}", ctx.accounts.fee_address_2_token_account.owner);
+        
         require!(
             ctx.accounts.fee_address_2_token_account.owner == state.fee_address_2,
             AerospacerFeesError::InvalidFeeAddress2
