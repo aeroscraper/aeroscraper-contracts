@@ -209,11 +209,13 @@ pub fn handler(ctx: Context<OpenTrove>, params: OpenTroveParams) -> Result<()> {
     // Initialize user debt amount
     ctx.accounts.user_debt_amount.owner = ctx.accounts.user.key();
     ctx.accounts.user_debt_amount.amount = 0; // Will be set below
+    ctx.accounts.user_debt_amount.l_debt_snapshot = 0; // Will be set to current global L value later
     
     // Initialize user collateral amount
     ctx.accounts.user_collateral_amount.owner = ctx.accounts.user.key();
     ctx.accounts.user_collateral_amount.denom = params.collateral_denom.clone();
     ctx.accounts.user_collateral_amount.amount = 0; // Will be set below
+    ctx.accounts.user_collateral_amount.l_collateral_snapshot = 0; // Will be set to current global L value later
     
     // Initialize liquidity threshold
     ctx.accounts.liquidity_threshold.owner = ctx.accounts.user.key();
@@ -330,12 +332,26 @@ pub fn handler(ctx: Context<OpenTrove>, params: OpenTroveParams) -> Result<()> {
     if ctx.accounts.total_collateral_amount.denom.is_empty() {
         ctx.accounts.total_collateral_amount.denom = params.collateral_denom.clone();
         ctx.accounts.total_collateral_amount.amount = params.collateral_amount;
+        ctx.accounts.total_collateral_amount.l_debt = 0;
+        ctx.accounts.total_collateral_amount.l_collateral = 0;
+        
+        msg!("First trove for {} - initializing L factors to 0", params.collateral_denom);
     } else {
         // Update existing total
         ctx.accounts.total_collateral_amount.amount = ctx.accounts.total_collateral_amount.amount
             .checked_add(params.collateral_amount)
             .ok_or(AerospacerProtocolError::OverflowError)?;
     }
+    
+    // CRITICAL: Set L snapshots to current global values to prevent unearned retroactive rewards
+    // When a new trove opens after redistributions have occurred, it should NOT receive rewards
+    // from liquidations that happened before it existed
+    ctx.accounts.user_debt_amount.l_debt_snapshot = ctx.accounts.total_collateral_amount.l_debt;
+    ctx.accounts.user_collateral_amount.l_collateral_snapshot = ctx.accounts.total_collateral_amount.l_collateral;
+    
+    msg!("Initialized user L snapshots: l_debt={}, l_collateral={}", 
+         ctx.accounts.user_debt_amount.l_debt_snapshot,
+         ctx.accounts.user_collateral_amount.l_collateral_snapshot);
     
     // Mint full loan amount to user first (user requested full amount, will pay fee from it)
     // Use invoke_signed for PDA authority

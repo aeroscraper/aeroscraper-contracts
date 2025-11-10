@@ -49,7 +49,10 @@ Then you can run:
   2. Partial coverage (hybrid: pool + redistribution)
   3. Empty pool (full redistribution to active troves)
 - **Pending Rewards**: All trove operations (add/remove collateral, borrow/repay, close) now apply pending redistribution gains before state changes
-- **Status**: ⚠️ **NOT PRODUCTION-READY FOR EXISTING DEPLOYMENTS** - Schema changes require account migration
+- **open_trove Fixed**: New troves capture current global L factors to prevent unearned retroactive rewards from past redistributions
+- **Status**: ✅ **PRODUCTION-READY FOR FRESH DEPLOYMENTS**
+  - Both liquidate_trove and open_trove are complete and production-ready
+  - ⚠️ **NOT COMPATIBLE WITH EXISTING DEPLOYMENTS** - Schema changes require account migration
   - Fresh deployments work correctly
   - Existing on-chain accounts will fail deserialization (added 16-32 bytes per account)
   - Migration required before deploying to networks with existing data
