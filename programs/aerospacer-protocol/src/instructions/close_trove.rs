@@ -94,7 +94,7 @@ pub fn handler(ctx: Context<CloseTrove>, params: CloseTroveParams) -> Result<()>
     
     // Apply pending redistribution rewards before closing trove
     use crate::trove_management::apply_pending_rewards;
-    let mut total_collateral_data = ctx.accounts.total_collateral_amount.try_borrow_mut_data()?;
+    let total_collateral_data = ctx.accounts.total_collateral_amount.try_borrow_mut_data()?;
     let total_collateral: TotalCollateralAmount = TotalCollateralAmount::try_from_slice(&total_collateral_data[8..])?;
     drop(total_collateral_data);
     

@@ -35,7 +35,7 @@ pub fn handler(ctx: Context<UpdatePythPrice>, params: UpdatePythPriceParams) -> 
     let clock = &ctx.accounts.clock;
     
     // Find the collateral data for the requested denom
-    let collateral_data = state.collateral_data
+    let _collateral_data = state.collateral_data
         .iter_mut()
         .find(|d| d.denom == params.denom)
         .ok_or(AerospacerOracleError::PriceFeedNotFound)?;

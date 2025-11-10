@@ -26,7 +26,7 @@ pub struct GetPrice<'info> {
 
 pub fn handler(ctx: Context<GetPrice>, params: GetPriceParams) -> Result<PriceResponse> {
     let state = &ctx.accounts.state;
-    let clock = &ctx.accounts.clock;
+    let _clock = &ctx.accounts.clock;
     
     // Find the collateral data for the requested denom
     let collateral_data = state.collateral_data

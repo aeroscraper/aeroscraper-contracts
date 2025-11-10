@@ -23,7 +23,7 @@ pub struct GetAllPrices<'info> {
 
 pub fn handler(ctx: Context<GetAllPrices>, _params: GetAllPricesParams) -> Result<Vec<PriceResponse>> {
     let state = &ctx.accounts.state;
-    let clock = &ctx.accounts.clock;
+    let _clock = &ctx.accounts.clock;
     
     // Get remaining accounts (should contain Pyth price accounts for each asset)
     let remaining_accounts = &ctx.remaining_accounts;

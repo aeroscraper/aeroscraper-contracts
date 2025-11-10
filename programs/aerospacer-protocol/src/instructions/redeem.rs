@@ -277,12 +277,12 @@ pub fn handler(ctx: Context<Redeem>, params: RedeemParams) -> Result<()> {
         );
         
         // Deserialize trove data
-        let mut debt_data = debt_account.try_borrow_mut_data()?;
+        let debt_data = debt_account.try_borrow_mut_data()?;
         let mut user_debt = UserDebtAmount::try_deserialize(&mut &debt_data[..])?;
         let trove_user = user_debt.owner;
         drop(debt_data);
         
-        let mut collateral_data = collateral_account.try_borrow_mut_data()?;
+        let collateral_data = collateral_account.try_borrow_mut_data()?;
         let mut user_collateral = UserCollateralAmount::try_deserialize(&mut &collateral_data[..])?;
         let collateral_denom = user_collateral.denom.clone();
         drop(collateral_data);
