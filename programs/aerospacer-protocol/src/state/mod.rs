@@ -9,9 +9,10 @@ pub struct StateAccount {
     pub oracle_state_addr: Pubkey,           // Oracle state account address  
     pub fee_distributor_addr: Pubkey,        // aerospacer-fees program ID
     pub fee_state_addr: Pubkey,              // aerospacer-fees state account address
-    pub minimum_collateral_ratio: u8,
+    pub minimum_collateral_ratio: u64,
     pub protocol_fee: u8,
     pub stable_coin_addr: Pubkey,
+    pub stable_coin_code_id: u64,
     pub total_debt_amount: u64, // Equivalent to Uint256
     pub total_stake_amount: u64, // Equivalent to Uint256
     
@@ -21,7 +22,7 @@ pub struct StateAccount {
 }
 
 impl StateAccount {
-    pub const LEN: usize = 8 + 32 + 32 + 32 + 32 + 32 + 1 + 1 + 32 + 8 + 8 + 16 + 8; // Added oracle_state_addr + fee_state_addr
+    pub const LEN: usize = 8 + 32 + 32 + 32 + 32 + 32 + 8 + 1 + 32 + 8 + 8 + 8 + 16 + 8; // Added oracle_state_addr + fee_state_addr + stable_coin_code_id, minimum_collateral_ratio now u64
     
     // Scale factor for precision in P/S calculations (10^18, same as Liquity)
     pub const SCALE_FACTOR: u128 = 1_000_000_000_000_000_000;
@@ -187,7 +188,7 @@ impl UserCollateralSnapshot {
 // Constants to match INJECTIVE exactly
 pub const MINIMUM_LOAN_AMOUNT: u64 = 1_000_000_000_000_000; // 0.001 aUSD with 18 decimals
 pub const MINIMUM_COLLATERAL_AMOUNT: u64 = 1_000_000; // 0.001 SOL with 9 decimals
-pub const DEFAULT_MINIMUM_COLLATERAL_RATIO: u8 = 115; // 115%
+pub const DEFAULT_MINIMUM_COLLATERAL_RATIO: u64 = 115_000_000; // 115% in micro-percent (115 * 1_000_000)
 pub const DEFAULT_PROTOCOL_FEE: u8 = 5; // 5%
 
 // Decimal fractions to match INJECTIVE

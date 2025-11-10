@@ -18,6 +18,9 @@ pub enum AerospacerProtocolError {
     #[msg("Invalid amount")]
     InvalidAmount,
     
+    #[msg("Invalid address")]
+    InvalidAddress,
+    
     #[msg("Invalid account data")]
     InvalidAccountData,
     
