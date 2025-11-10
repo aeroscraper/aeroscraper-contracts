@@ -193,16 +193,17 @@ pub fn handler(ctx: Context<BorrowLoan>, params: BorrowLoanParams) -> Result<()>
         clock: ctx.accounts.clock.to_account_info(),
     };
     
-    // Calculate fee and net loan amount
+    // Calculate fee amount for distribution
     let fee_amount = calculate_protocol_fee(params.loan_amount, ctx.accounts.state.protocol_fee)?;
-    let net_loan_amount = params.loan_amount - fee_amount;
     
-    // Use TroveManager for clean implementation (with net amount)
+    // CRITICAL: Record FULL gross amount as debt (including fee)
+    // This ensures all minted tokens have matching debt liability
+    // User borrows 1000 aUSD: receives 1000, pays 50 in fees, must repay 1000
     let result = TroveManager::borrow_loan(
         &mut trove_ctx,
         &mut collateral_ctx,
         &oracle_ctx,
-        net_loan_amount,
+        params.loan_amount,  // Use gross amount, not net
     )?;
     
     // CRITICAL: Validate ICR ordering if neighbor hints provided
@@ -298,11 +299,11 @@ pub fn handler(ctx: Context<BorrowLoan>, params: BorrowLoanParams) -> Result<()>
     }
     
     msg!("Loan borrowed successfully");
-    msg!("Total amount: {} aUSD", params.loan_amount);
-    msg!("Net loan amount: {} aUSD", net_loan_amount);
-    msg!("Fee amount: {} aUSD", fee_amount);
+    msg!("Gross loan amount (recorded as debt): {} aUSD", params.loan_amount);
+    msg!("Fee amount distributed: {} aUSD", fee_amount);
+    msg!("Net amount to user after fee: {} aUSD", params.loan_amount - fee_amount);
     msg!("Collateral denom: {}", params.collateral_denom);
-    msg!("New debt amount: {}", result.new_debt_amount);
+    msg!("New total debt: {}", result.new_debt_amount);
     msg!("New ICR: {}", result.new_icr);
     msg!("Collateral amount: {}", result.new_collateral_amount);
     

@@ -178,6 +178,55 @@ pub fn handler(ctx: Context<RepayLoan>, params: RepayLoanParams) -> Result<()> {
         Ok::<_, Error>(result)
     }?;
     
+    // CRITICAL: Validate ICR ordering if neighbor hints provided
+    // Production clients MUST provide neighbor hints via remainingAccounts for proper sorted list maintenance
+    // Pattern: [prev_LiquidityThreshold, next_LiquidityThreshold] or [prev_LT] or [next_LT] or []
+    // Optional for backward compatibility with tests, but REQUIRED in production
+    if !ctx.remaining_accounts.is_empty() {
+        use crate::sorted_troves;
+        
+        msg!("Validating ICR ordering with {} neighbor account(s)", ctx.remaining_accounts.len());
+        
+        let prev_icr = if ctx.remaining_accounts.len() >= 1 {
+            let prev_lt = &ctx.remaining_accounts[0];
+            let prev_data = prev_lt.try_borrow_data()?;
+            let prev_threshold = LiquidityThreshold::try_deserialize(&mut &prev_data[..])?;
+            let prev_owner = prev_threshold.owner;
+            let prev_ratio = prev_threshold.ratio;
+            drop(prev_data);
+            
+            // Verify this is a real PDA, not a fake account
+            sorted_troves::verify_liquidity_threshold_pda(prev_lt, prev_owner, ctx.program_id)?;
+            
+            Some(prev_ratio)
+        } else {
+            None
+        };
+        
+        let next_icr = if ctx.remaining_accounts.len() >= 2 {
+            let next_lt = &ctx.remaining_accounts[1];
+            let next_data = next_lt.try_borrow_data()?;
+            let next_threshold = LiquidityThreshold::try_deserialize(&mut &next_data[..])?;
+            let next_owner = next_threshold.owner;
+            let next_ratio = next_threshold.ratio;
+            drop(next_data);
+            
+            // Verify this is a real PDA, not a fake account
+            sorted_troves::verify_liquidity_threshold_pda(next_lt, next_owner, ctx.program_id)?;
+            
+            Some(next_ratio)
+        } else {
+            None
+        };
+        
+        // Validate ordering BEFORE updating state
+        sorted_troves::validate_icr_ordering(result.new_icr, prev_icr, next_icr)?;
+        msg!("✓ ICR ordering validated successfully");
+    } else {
+        msg!("⚠ WARNING: No neighbor hints provided - skipping ICR ordering validation");
+        msg!("⚠ Production clients MUST provide neighbor hints for sorted list integrity");
+    }
+    
     // Update the actual accounts with the results
     ctx.accounts.user_debt_amount.amount = result.new_debt_amount;
     ctx.accounts.liquidity_threshold.ratio = result.new_icr;
