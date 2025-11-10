@@ -3,6 +3,7 @@ import { Program } from "@coral-xyz/anchor";
 import { AerospacerFees } from "../target/types/aerospacer_fees";
 import { PublicKey, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
     console.log("\n🔧 Updating Aerospacer Fee Configuration on Devnet\n");
@@ -17,10 +18,10 @@ async function main() {
     console.log("📝 Admin wallet:", admin.publicKey.toString());
     console.log("📝 Fees program:", feesProgram.programId.toString());
     
-    // Load keypairs from files
-    const feeAddress1Path = "/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/keys/fee-addresses/fee_address_1.json";
-    const feeAddress2Path = "/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/keys/fee-addresses/fee_address_2.json";
-    const stakingAddressPath = "/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/keys/staking-address/staking_address.json";
+    // Load keypairs from files (using relative paths from project root)
+    const feeAddress1Path = path.join(__dirname, "..", "keys", "fee-addresses", "fee_address_1.json");
+    const feeAddress2Path = path.join(__dirname, "..", "keys", "fee-addresses", "fee_address_2.json");
+    const stakingAddressPath = path.join(__dirname, "..", "keys", "staking-address", "staking_address.json");
     
     console.log("\n📂 Loading keypairs from files...");
     
