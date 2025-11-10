@@ -234,6 +234,19 @@ pub fn handler(ctx: Context<Redeem>, params: RedeemParams) -> Result<()> {
     let num_troves = ctx.remaining_accounts.len() / 4;
     msg!("Processing redemption across {} pre-sorted troves", num_troves);
     
+    // SECURITY: Verify total_collateral_amount PDA is authentic
+    let (expected_total_coll_pda, _bump) = Pubkey::find_program_address(
+        &[b"total_collateral_amount", params.collateral_denom.as_bytes()],
+        &crate::ID,
+    );
+    require!(
+        expected_total_coll_pda == *ctx.accounts.total_collateral_amount.key,
+        AerospacerProtocolError::InvalidList
+    );
+    
+    // Track previous ICR for sorted list validation
+    let mut prev_icr: Option<u64> = None;
+    
     // Iterate through pre-sorted troves provided by client
     for i in 0..num_troves {
         if remaining_amount == 0 {
@@ -245,21 +258,89 @@ pub fn handler(ctx: Context<Redeem>, params: RedeemParams) -> Result<()> {
         // Get accounts for this trove
         let debt_account = &ctx.remaining_accounts[base_idx];
         let collateral_account = &ctx.remaining_accounts[base_idx + 1];
-        let _lt_account = &ctx.remaining_accounts[base_idx + 2];
+        let lt_account = &ctx.remaining_accounts[base_idx + 2];
         let token_account = &ctx.remaining_accounts[base_idx + 3];
         
+        // SECURITY: Verify program ownership for all trove accounts
+        // Use crate::ID for cross-program invocation compatibility
+        require!(
+            debt_account.owner == &crate::ID,
+            AerospacerProtocolError::Unauthorized
+        );
+        require!(
+            collateral_account.owner == &crate::ID,
+            AerospacerProtocolError::Unauthorized
+        );
+        require!(
+            lt_account.owner == &crate::ID,
+            AerospacerProtocolError::Unauthorized
+        );
+        
         // Deserialize trove data
-        let debt_data = debt_account.try_borrow_data()?;
-        let user_debt = UserDebtAmount::try_deserialize(&mut &debt_data[..])?;
+        let mut debt_data = debt_account.try_borrow_mut_data()?;
+        let mut user_debt = UserDebtAmount::try_deserialize(&mut &debt_data[..])?;
         let trove_user = user_debt.owner;
-        let debt_amount = user_debt.amount;
         drop(debt_data);
         
-        let collateral_data = collateral_account.try_borrow_data()?;
-        let user_collateral = UserCollateralAmount::try_deserialize(&mut &collateral_data[..])?;
+        let mut collateral_data = collateral_account.try_borrow_mut_data()?;
+        let mut user_collateral = UserCollateralAmount::try_deserialize(&mut &collateral_data[..])?;
         let collateral_denom = user_collateral.denom.clone();
-        let collateral_amount = user_collateral.amount;
         drop(collateral_data);
+        
+        // CRITICAL: Apply pending redistribution rewards before processing redemption
+        // This ensures trove state is up-to-date with any liquidation gains
+        let total_coll_data = ctx.accounts.total_collateral_amount.try_borrow_data()?;
+        let total_collateral = TotalCollateralAmount::try_deserialize(&mut &total_coll_data[..])?;
+        drop(total_coll_data);
+        
+        use crate::trove_management::apply_pending_rewards;
+        apply_pending_rewards(&mut user_debt, &mut user_collateral, &total_collateral)?;
+        
+        // Serialize updated debt and collateral after applying rewards
+        let mut debt_data_after = debt_account.try_borrow_mut_data()?;
+        user_debt.try_serialize(&mut &mut debt_data_after[..])?;
+        drop(debt_data_after);
+        
+        let mut collateral_data_after = collateral_account.try_borrow_mut_data()?;
+        user_collateral.try_serialize(&mut &mut collateral_data_after[..])?;
+        drop(collateral_data_after);
+        
+        // Get updated values after rewards
+        let debt_amount = user_debt.amount;
+        let collateral_amount = user_collateral.amount;
+        
+        // Skip troves with zero debt (already fully redeemed or liquidated)
+        if debt_amount == 0 {
+            msg!("Trove {} has zero debt, skipping", trove_user);
+            continue;
+        }
+        
+        // Deserialize LiquidityThreshold to get ICR and verify PDA
+        let lt_data = lt_account.try_borrow_data()?;
+        let liquidity_threshold = LiquidityThreshold::try_deserialize(&mut &lt_data[..])?;
+        let current_icr = liquidity_threshold.ratio;
+        
+        // Verify LiquidityThreshold matches the debt account owner
+        require!(
+            liquidity_threshold.owner == trove_user,
+            AerospacerProtocolError::InvalidList
+        );
+        drop(lt_data);
+        
+        // SECURITY: Verify LiquidityThreshold is a real PDA, not a fake account
+        // This prevents attackers from injecting fabricated accounts with arbitrary ICRs
+        use crate::sorted_troves::verify_liquidity_threshold_pda;
+        verify_liquidity_threshold_pda(lt_account, trove_user, &crate::ID)?;
+        
+        // SECURITY: Validate ICR ordering (sorted from lowest to highest)
+        // Ensures redemptions target riskiest troves first (Liquity model)
+        if let Some(prev) = prev_icr {
+            require!(
+                prev <= current_icr,
+                AerospacerProtocolError::InvalidList
+            );
+        }
+        prev_icr = Some(current_icr);
         
         // Skip if this trove doesn't have the requested collateral type
         if collateral_denom != params.collateral_denom {
@@ -267,9 +348,18 @@ pub fn handler(ctx: Context<Redeem>, params: RedeemParams) -> Result<()> {
             continue;
         }
         
-        // Validate token account
+        // SECURITY: Validate token account belongs to trove owner and is correct mint
         require!(
             token_account.owner == &anchor_spl::token::ID,
+            AerospacerProtocolError::Unauthorized
+        );
+        
+        let token_acct_data = token_account.try_borrow_data()?;
+        let token_account_info = TokenAccount::try_deserialize(&mut &token_acct_data[..])?;
+        drop(token_acct_data);
+        
+        require!(
+            token_account_info.owner == trove_user,
             AerospacerProtocolError::Unauthorized
         );
         
@@ -283,14 +373,28 @@ pub fn handler(ctx: Context<Redeem>, params: RedeemParams) -> Result<()> {
         // Calculate how much to redeem from this trove
         let redeem_from_trove = remaining_amount.min(trove_data.debt_amount);
         
-        // Calculate collateral to send (proportional to debt redeemed)
-        let collateral_ratio = if trove_data.debt_amount > 0 {
-            (redeem_from_trove as f64) / (trove_data.debt_amount as f64)
+        // CRITICAL FIX: Calculate collateral to send using deterministic integer math
+        // Formula: collateral_to_send = (collateral_amount * redeem_from_trove) / debt_amount
+        // This replaces floating-point math which is non-deterministic on-chain
+        let collateral_to_send = if trove_data.debt_amount > 0 {
+            let numerator = (collateral_amount as u128)
+                .checked_mul(redeem_from_trove as u128)
+                .ok_or(AerospacerProtocolError::MathOverflow)?;
+            let result = numerator
+                .checked_div(trove_data.debt_amount as u128)
+                .ok_or(AerospacerProtocolError::DivideByZeroError)?;
+            u64::try_from(result)
+                .map_err(|_| AerospacerProtocolError::MathOverflow)?
         } else {
-            0.0
+            0u64
         };
         
-        let collateral_to_send = ((collateral_amount as f64) * collateral_ratio) as u64;
+        // CRITICAL: Skip troves where collateral payout would be zero
+        // Prevents users from burning stablecoins without receiving collateral
+        if collateral_to_send == 0 && redeem_from_trove > 0 {
+            msg!("Trove {} would yield zero collateral for {} debt redemption (undercollateralized), skipping", trove_user, redeem_from_trove);
+            continue;
+        }
         
         if collateral_to_send > 0 {
             // Transfer collateral to user
