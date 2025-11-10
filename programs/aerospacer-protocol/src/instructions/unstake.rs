@@ -57,11 +57,6 @@ pub fn handler(ctx: Context<Unstake>, params: UnstakeParams) -> Result<()> {
         params.amount > 0,
         AerospacerProtocolError::InvalidAmount
     );
-    
-    require!(
-        params.amount >= MINIMUM_LOAN_AMOUNT, // Use same minimum as loans
-        AerospacerProtocolError::InvalidAmount
-    );
 
     let user_stake_amount = &mut ctx.accounts.user_stake_amount;
     let state = &mut ctx.accounts.state;
@@ -78,6 +73,16 @@ pub fn handler(ctx: Context<Unstake>, params: UnstakeParams) -> Result<()> {
         compounded_stake >= params.amount,
         AerospacerProtocolError::InvalidAmount
     );
+    
+    // CRITICAL: Allow full withdrawal even if below minimum (to prevent fund trapping after liquidations)
+    // Only enforce minimum for partial withdrawals
+    let is_full_withdrawal = params.amount == compounded_stake;
+    if !is_full_withdrawal {
+        require!(
+            params.amount >= MINIMUM_LOAN_AMOUNT,
+            AerospacerProtocolError::InvalidAmount
+        );
+    }
 
     // Transfer stablecoin back to user from protocol vault (Injective: CW20 transfer)
     let transfer_seeds = &[
@@ -118,6 +123,20 @@ pub fn handler(ctx: Context<Unstake>, params: UnstakeParams) -> Result<()> {
 
     user_stake_amount.amount = new_deposit;
     user_stake_amount.last_update_block = Clock::get()?.slot;
+    
+    // CRITICAL FIX: Update snapshots to current state after withdrawal
+    // Without this, future compounding uses stale P/epoch and misprices stakes
+    if new_deposit > 0 {
+        // Partial withdrawal - refresh snapshots to current scale
+        user_stake_amount.p_snapshot = state.p_factor;
+        user_stake_amount.epoch_snapshot = state.epoch;
+        msg!("Snapshots refreshed: P={}, epoch={}", state.p_factor, state.epoch);
+    } else {
+        // Full withdrawal - clear snapshots for hygiene
+        user_stake_amount.p_snapshot = 0;
+        user_stake_amount.epoch_snapshot = 0;
+        msg!("Full withdrawal - snapshots cleared");
+    }
 
     // Update state
     state.total_stake_amount = safe_sub(state.total_stake_amount, params.amount)?;
