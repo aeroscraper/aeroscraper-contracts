@@ -68,8 +68,11 @@ pub struct RepayLoan<'info> {
     )]
     pub protocol_collateral_account: Account<'info, TokenAccount>,
 
-    /// CHECK: Stable coin mint - used for burn (supply change)
-    #[account(mut)]
+    /// CHECK: Stable coin mint - used for burn (supply change) - validated against state
+    #[account(
+        mut,
+        constraint = stable_coin_mint.key() == state.stable_coin_addr @ AerospacerProtocolError::InvalidMint
+    )]
     pub stable_coin_mint: UncheckedAccount<'info>,
 
     /// CHECK: Per-denom collateral total PDA

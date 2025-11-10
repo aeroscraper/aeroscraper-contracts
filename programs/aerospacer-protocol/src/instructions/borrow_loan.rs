@@ -44,8 +44,11 @@ pub struct BorrowLoan<'info> {
     #[account(mut)]
     pub user_stablecoin_account: Box<Account<'info, TokenAccount>>,
 
-    /// CHECK: This is the stable coin mint account
-    #[account(mut)]
+    /// CHECK: This is the stable coin mint account - validated against state
+    #[account(
+        mut,
+        constraint = stable_coin_mint.key() == state.stable_coin_addr @ AerospacerProtocolError::InvalidMint
+    )]
     pub stable_coin_mint: UncheckedAccount<'info>,
     
     #[account(

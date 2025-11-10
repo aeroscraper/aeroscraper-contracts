@@ -30,7 +30,10 @@ pub struct LiquidateTroves<'info> {
     #[account(mut)]
     pub state: Account<'info, StateAccount>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = stable_coin_mint.key() == state.stable_coin_addr @ AerospacerProtocolError::InvalidMint
+    )]
     pub stable_coin_mint: Account<'info, Mint>,
 
     /// CHECK: Protocol stablecoin vault PDA
