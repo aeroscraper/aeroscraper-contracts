@@ -40,6 +40,24 @@ Then you can run:
 
 ## Recent Changes
 
+### November 10, 2025 - Stability Pool Stake/Unstake Production Fixes
+**Fixed Critical Snapshot Staleness Bug in unstake:**
+- **Issue**: unstake was not updating p_snapshot and epoch_snapshot after withdrawal, causing future compounding to use stale scale factors
+- **Impact**: After liquidations changed P factor, subsequent stakes/unstakes would incorrectly price the user's position
+- **Fix**: Added snapshot refresh on partial withdrawal, clear on full exit
+
+**Fixed Fund Trapping Issue in unstake:**
+- **Issue**: MINIMUM_LOAN_AMOUNT requirement prevented users from withdrawing compounded stakes below minimum after liquidations
+- **Example**: User with 1000 staked → liquidation reduces to 50 → user cannot withdraw their 50 aUSD
+- **Fix**: Allow full withdrawal regardless of minimum amount; only enforce minimum for partial withdrawals
+- **Impact**: Users can always exit their positions after liquidations
+
+**Production Status:** ✅ **BOTH INSTRUCTIONS PRODUCTION-READY**
+- Architect review confirms snapshot management is correct and symmetric between stake/unstake
+- No fund trapping possible - users can always exit after liquidations
+- Compounding math stays aligned with global P factor across all operations
+- Both stake and unstake ready for production deployment
+
 ### November 10, 2025 - Critical Debt Accounting Fix & Sorted List Validation
 **Fixed Critical Under-Collateralization Bug in borrow_loan:**
 - **Issue**: borrow_loan was recording net_loan_amount as debt but minting params.loan_amount (gross), creating unbacked tokens
