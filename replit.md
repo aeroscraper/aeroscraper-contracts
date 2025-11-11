@@ -43,6 +43,40 @@ A full security audit was conducted on all 16 instructions in the aerospacer-pro
 - ✅ All token operations properly validated against protocol configuration
 - ✅ Architect certified for mainnet deployment
 
+## Recent Changes
+
+### ICR/MCR Calculation Bug Fix - November 11, 2025
+
+**Issue:** CollateralBelowMinimum errors were occurring even when ICR was well above the 115% minimum. Frontend calculated ICR correctly (97,310%), but on-chain calculations failed.
+
+**Root Cause:** Oracle was returning only Pyth's price exponent (8) as the decimal, but the calculation needed to account for both token decimals (9 for SOL) and price exponent (8) to produce micro-USD (10^-6 USD) collateral values required by the protocol's scaling logic.
+
+**Fixes Implemented:**
+1. **Oracle decimal adjustment** (`programs/aerospacer-oracle/src/instructions/get_price.rs`):
+   - Formula: `adjusted_decimal = (token_decimals + price_exponent) - 6`
+   - For SOL: 9 + 8 - 6 = 11 (instead of 8)
+   - Validates `total_precision >= 6` to prevent underflow for low-precision tokens
+   - This ensures collateral_value is in micro-USD units
+
+2. **Comprehensive debug logging** added throughout ICR/MCR calculation pipeline:
+   - Oracle CPI response logging
+   - PriceCalculator::calculate_collateral_value logging
+   - PriceCalculator::calculate_collateral_ratio logging  
+   - borrow_loan ICR check logging
+   - Shows exact values at each step for troubleshooting
+
+3. **Multi-collateral ICR helper alignment** (`programs/aerospacer-protocol/src/utils/mod.rs`):
+   - Updated hardcoded decimals to match oracle's adjusted values
+   - SOL: 11, USDC: 8, INJ: 20, ATOM: 8
+
+**Technical Details:**
+- Collateral value formula: `(amount × price) / 10^adjusted_decimal`
+- For 0.89 SOL @ $163.43: `(890000000 × 13981741499) / 10^11 = 124,437,497` micro-USD
+- Scaled to 18 decimals: `124,437,497 × 10^12`
+- ICR: `(scaled_value × 100) / debt_amount = ~83,235%` ✓ (above 115% MCR)
+
+**Status:** Code changes complete. Awaiting local build and devnet deployment.
+
 ## User Preferences
 *This section will be updated as you work with the project*
 
