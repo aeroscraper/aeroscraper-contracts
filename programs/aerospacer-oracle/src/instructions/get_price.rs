@@ -51,12 +51,43 @@ pub fn handler(ctx: Context<GetPrice>, params: GetPriceParams) -> Result<PriceRe
     require!(price.price > 0, AerospacerOracleError::InvalidPriceData);
     require!(price.conf >= 100, AerospacerOracleError::PythPriceValidationFailed); // Reduced from 1000 to 100 for devnet
     
-    let actual_decimal = (-price.expo) as u8;
+    let price_exponent = (-price.expo) as u8;
+    let token_decimals = collateral_data.decimal;
+    
+    // CRITICAL FIX: Calculate decimal to produce micro-USD (6 decimals) collateral values
+    // Formula: decimal = token_decimals + price_exponent - 6
+    // This ensures calculate_collateral_value returns values in micro-USD units,
+    // which is required for calculate_collateral_ratio's 10^12 scaling to work correctly.
+    //
+    // Example for SOL:
+    //   token_decimals = 9 (SOL has 9 decimals)
+    //   price_exponent = 8 (Pyth price has exponent -8)
+    //   target_decimal = 9 + 8 - 6 = 11
+    //
+    // This makes: collateral_value = (amount × price) / 10^11
+    // With amount in lamports (10^-9 SOL) and price as Pyth raw value:
+    //   collateral_value = (lamports × price) / 10^11
+    //                    = (SOL × 10^9 × price × 10^-8) / 10^11
+    //                    = (SOL × price) / 10^10
+    //                    = USD / 10^6  (since SOL × price = USD)
+    //                    = micro-USD ✓
+    const TARGET_USD_DECIMALS: u8 = 6; // micro-USD (10^-6 USD)
+    
+    // Validate token has sufficient precision for micro-USD calculation
+    // Reject tokens with total_precision < 6 (extremely rare in practice)
+    let total_precision = token_decimals.saturating_add(price_exponent);
+    require!(
+        total_precision >= TARGET_USD_DECIMALS,
+        AerospacerOracleError::InvalidPriceData
+    );
+    
+    let adjusted_decimal = total_precision - TARGET_USD_DECIMALS;
 
     msg!("Price query successful");
     msg!("Denom: {}", params.denom);
-    msg!("Decimal: {}", collateral_data.decimal);
-    msg!("Actual decimal: {}", actual_decimal);
+    msg!("Token decimal: {}", token_decimals);
+    msg!("Price exponent: {}", price_exponent);
+    msg!("Adjusted decimal (for micro-USD): {}", adjusted_decimal);
     msg!("Publish Time: {}", price.publish_time);
     msg!("Price: {} ± {} x 10^{}", price.price, price.conf, price.expo);
     msg!("Real Pyth data extracted successfully using official SDK");
@@ -64,7 +95,7 @@ pub fn handler(ctx: Context<GetPrice>, params: GetPriceParams) -> Result<PriceRe
     Ok(PriceResponse {
         denom: params.denom,
         price: price.price,
-        decimal: actual_decimal, // Use actual price decimal from Pyth
+        decimal: adjusted_decimal, // Adjusted to produce micro-USD collateral values
         timestamp: price.publish_time,
         confidence: price.conf,
         exponent: price.expo,

@@ -108,18 +108,31 @@ impl PriceCalculator {
         price: u64,
         decimal: u8,
     ) -> Result<u64> {
+        msg!("🔍 [PriceCalculator::calculate_collateral_value]");
+        msg!("  amount (lamports): {}", amount);
+        msg!("  price (raw Pyth): {}", price);
+        msg!("  decimal (from oracle): {}", decimal);
+        
         let decimal_factor = 10_u128.pow(decimal as u32);
-        let value = (amount as u128)
+        msg!("  decimal_factor (10^{}): {}", decimal, decimal_factor);
+        
+        let product = (amount as u128)
             .checked_mul(price as u128)
-            .ok_or(AerospacerProtocolError::OverflowError)?
+            .ok_or(AerospacerProtocolError::OverflowError)?;
+        msg!("  amount × price: {}", product);
+        
+        let value = product
             .checked_div(decimal_factor)
             .ok_or(AerospacerProtocolError::OverflowError)?;
+        msg!("  collateral_value (after division): {}", value);
         
         // Convert back to u64, ensuring it fits
         if value > u64::MAX as u128 {
+            msg!("❌ Overflow: value {} > u64::MAX", value);
             return Err(AerospacerProtocolError::OverflowError.into());
         }
         
+        msg!("✅ Final collateral_value (u64): {}", value as u64);
         Ok(value as u64)
     }
     
@@ -133,29 +146,45 @@ impl PriceCalculator {
         collateral_value: u64,
         debt_amount: u64,
     ) -> Result<u64> {
+        msg!("🔍 [PriceCalculator::calculate_collateral_ratio]");
+        msg!("  collateral_value: {}", collateral_value);
+        msg!("  debt_amount: {}", debt_amount);
+        
         if debt_amount == 0 {
+            msg!("  debt is 0 → returning u64::MAX");
             return Ok(u64::MAX);
         }
         
         // Normalize both values to the same units for comparison
-        // Collateral value is typically in micro-USD (6 decimals)
-        // Debt amount is typically in micro-aUSD (18 decimals)
-        // We need to scale them to the same precision
+        // Collateral value is in micro-USD (6 decimals) - enforced by oracle's adjusted_decimal
+        // Debt amount is in 18 decimals (aUSD has 18 decimals)
+        // We need to scale them to the same precision: 10^(18-6) = 10^12
         
         // Scale collateral value to match debt amount precision (18 decimals)
         let scaled_collateral_value = (collateral_value as u128)
             .checked_mul(1_000_000_000_000) // Scale up by 10^12 to match 18 decimals
             .ok_or(AerospacerProtocolError::OverflowError)?;
+        msg!("  scaled_collateral_value (×10^12): {}", scaled_collateral_value);
         
         // Calculate ratio as percentage (multiply by 100)
-        let ratio = scaled_collateral_value
+        let numerator = scaled_collateral_value
             .checked_mul(100)
-            .ok_or(AerospacerProtocolError::OverflowError)?
+            .ok_or(AerospacerProtocolError::OverflowError)?;
+        msg!("  numerator (×100): {}", numerator);
+        
+        let ratio = numerator
             .checked_div(debt_amount as u128)
             .ok_or(AerospacerProtocolError::OverflowError)?;
+        msg!("  ratio (percentage): {}", ratio);
         
         // Convert back to u64
-        u64::try_from(ratio).map_err(|_| AerospacerProtocolError::OverflowError.into())
+        let result = u64::try_from(ratio).map_err(|_| {
+            msg!("❌ Overflow converting ratio {} to u64", ratio);
+            AerospacerProtocolError::OverflowError
+        })?;
+        
+        msg!("✅ Final ICR: {}%", result);
+        Ok(result)
     }
     
     /// Check if trove is liquidatable
@@ -292,7 +321,13 @@ pub fn get_price_via_cpi<'info>(
     // Deserialize PriceResponse
     let price_response: PriceResponse = PriceResponse::deserialize(&mut &return_data.1[..])?;
     
-    msg!("Price received: {} for {}", price_response.price, price_response.denom);
+    msg!("✅ [Oracle CPI] Price received from oracle:");
+    msg!("  denom: {}", price_response.denom);
+    msg!("  price: {}", price_response.price);
+    msg!("  decimal: {}", price_response.decimal);
+    msg!("  exponent: {}", price_response.exponent);
+    msg!("  confidence: {}", price_response.confidence);
+    msg!("  timestamp: {}", price_response.timestamp);
     
     Ok(price_response)
 }

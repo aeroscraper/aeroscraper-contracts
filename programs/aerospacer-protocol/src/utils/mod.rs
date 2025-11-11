@@ -224,13 +224,15 @@ pub fn get_trove_icr<'a>(
     
     for (denom, _amount) in &collateral_amounts {
         if let Some(price) = collateral_prices.get(denom) {
-            // Get decimal precision for each denom
+            // Get ADJUSTED decimal precision for each denom (to produce micro-USD values)
+            // Formula: adjusted_decimal = token_decimals + price_exponent - 6
+            // Must match the oracle's adjusted_decimal calculation
             let decimal = match denom.as_str() {
-                "SOL" => 9,
-                "USDC" => 6,
-                "INJ" => 18,
-                "ATOM" => 6,
-                _ => 6, // Default to 6 decimals
+                "SOL" => 11,    // token(9) + price_exp(8) - target(6) = 11
+                "USDC" => 8,    // token(6) + price_exp(8) - target(6) = 8
+                "INJ" => 20,    // token(18) + price_exp(8) - target(6) = 20
+                "ATOM" => 8,    // token(6) + price_exp(8) - target(6) = 8
+                _ => 8,         // Default: assume 6 token decimals + 8 price exp - 6 = 8
             };
             
             price_data.push((denom.clone(), *price, decimal));

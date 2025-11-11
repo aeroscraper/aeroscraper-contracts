@@ -276,10 +276,22 @@ impl TroveManager {
             .ok_or(AerospacerProtocolError::OverflowError)?;
         
         // Get collateral price
+        msg!("📊 [borrow_loan] Getting oracle price for denom: {}", collateral_info.denom);
         let price_data = oracle_ctx.get_price(&collateral_info.denom)?;
         oracle_ctx.validate_price(&price_data)?;
         
+        msg!("📊 [borrow_loan] Oracle price data:");
+        msg!("  denom: {}", price_data.denom);
+        msg!("  price: {}", price_data.price);
+        msg!("  decimal: {}", price_data.decimal);
+        msg!("  exponent: {}", price_data.exponent);
+        msg!("  confidence: {}", price_data.confidence);
+        
         // Calculate collateral value
+        msg!("📊 [borrow_loan] Calculating collateral value:");
+        msg!("  collateral_amount: {}", collateral_info.amount);
+        msg!("  new_debt_amount: {}", new_debt_amount);
+        
         let collateral_value = PriceCalculator::calculate_collateral_value(
             collateral_info.amount,
             price_data.price as u64, // Convert i64 to u64
@@ -294,6 +306,16 @@ impl TroveManager {
         
         // Check minimum collateral ratio
         let minimum_ratio = trove_ctx.state.minimum_collateral_ratio as u64;
+        msg!("📊 [borrow_loan] ICR Check:");
+        msg!("  new_icr: {}%", new_icr);
+        msg!("  minimum_ratio (MCR): {}%", minimum_ratio);
+        
+        if new_icr < minimum_ratio {
+            msg!("❌ ICR {} < MCR {} → CollateralBelowMinimum", new_icr, minimum_ratio);
+        } else {
+            msg!("✅ ICR {} >= MCR {} → Check passed", new_icr, minimum_ratio);
+        }
+        
         require!(
             new_icr >= minimum_ratio,
             AerospacerProtocolError::CollateralBelowMinimum
