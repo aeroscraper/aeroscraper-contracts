@@ -1,0 +1,421 @@
+
+taha@HP-Probook:~/Documents/Projects/Aeroscraper/aeroscraper-contracts$ ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ANCHOR_WALLET=~/.config/solana/id.json npx ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/protocol-core.ts'
+USER1: GLThBB9YBHJgQMVj2wGpbLwKwEMfjr1ieVHaqgueYxUn
+USER2: H6jcCMEZJvBsyd16VizDF9E6aosUpzuTvjuhk1JWWavw
+(node:881639) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/tests/protocol-core.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+  Aeroscraper Protocol Core Operations
+Using existing stablecoin mint: Qi22PryL2nztUCaGhFU2CEuvDpzTNAgXy3wZFU5nCfJ
+✅ Created new collateral mint for localnet: BPr1UnAqwn59D4rmMoTkVxqKdsxorixQr2s1YJTe4A1o
+Creating admin stablecoin account...
+Admin public key: 5oMxbgjPWkBYRKbsh3yKrrEC5Ut8y3azHKc787YHY9Ar
+Stablecoin mint: Qi22PryL2nztUCaGhFU2CEuvDpzTNAgXy3wZFU5nCfJ
+Admin stablecoin account already exists, skipping creation
+Creating admin collateral account...
+Creating user1 stablecoin account...
+User1 stablecoin account already exists
+Creating user1 collateral account...
+Creating user2 stablecoin account...
+User2 stablecoin account already exists
+Creating user2 collateral account...
+Skipping stablecoin minting - protocol will mint tokens during operations
+Mint authority: 5oMxbgjPWkBYRKbsh3yKrrEC5Ut8y3azHKc787YHY9Ar, Admin: 5oMxbgjPWkBYRKbsh3yKrrEC5Ut8y3azHKc787YHY9Ar, Can mint: true
+✅ Minting collateral tokens for testing (localnet)...
+✅ Minted and distributed collateral tokens successfully
+Creating token account for feeAddress1...
+FeeAddress1: 8Lv4UrYHTrzvg9jPVVGNmxWyMrMvrZnCQLWucBzfJyyR
+StablecoinMint: Qi22PryL2nztUCaGhFU2CEuvDpzTNAgXy3wZFU5nCfJ
+FeeAddress1 token account already exists: EkerNdDeVYTGvyZhRL8ueWNzNWGkhuqzzwetp4CyDbWv
+FeeAddress2 token account already exists: iG4X8fMSXL26biqSyLxrpPw5JjLYmuWZfmVZqvJfdwd
+Fee1 token account owner: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+Expected fee1 owner: 8Lv4UrYHTrzvg9jPVVGNmxWyMrMvrZnCQLWucBzfJyyR
+Match: false
+Fee2 token account owner: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+Expected fee2 owner: GcNwV1nA5bityjNYsWwPLHykpKuuhPzK1AQFBbrPopnX
+Match: false
+Token accounts created successfully
+Oracle already initialized
+Fees already initialized
+Protocol already initialized
+✅ Protocol state has correct addresses
+Skipping PDA token account creation (not allowed)
+    Core Protocol Operations
+🔍 Debug - Account addresses being passed:
+- oracleProgram: 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K
+- oracleState: DuY2DAZHAKx26tvbavLqXuKizeo7dSJRG3qoZzedYXny
+- feesProgram: FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj
+- feesState: 4wrrHgaTkv4vTERUMjmYXF2beaWZmPL2nCBvwht4VMZM
+- Neighbor hints: 0
+❌ Trove opening failed: AnchorError: AnchorError thrown in programs/aerospacer-fees/src/instructions/distribute_fee.rs:112. Error Code: InvalidFeeAddress1. Error Number: 6009. Error Message: Invalid fee address 1 - owner must match configured fee_address_1.
+    at Function.parse (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+    at translateError (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+    at MethodsBuilder.rpc [as _rpcFn] (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  errorLogs: [
+    'Program log: AnchorError thrown in programs/aerospacer-fees/src/instructions/distribute_fee.rs:112. Error Code: InvalidFeeAddress1. Error Number: 6009. Error Message: Invalid fee address 1 - owner must match configured fee_address_1.'
+  ],
+  logs: [
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]',
+    'Program log: Instruction: OpenTrove',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: InitializeAccount3',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 165104 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: InitializeAccount3',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 134974 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program log: Opening fee: 55000000000000 aUSD (5%)',
+    'Program log: Net loan amount: 1045000000000000 aUSD',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K invoke [2]',
+    'Program log: Instruction: GetPrice',
+    'Program log: Price query successful',
+    'Program log: Denom: SOL',
+    'Program log: Decimal: 9',
+    'Program log: Publish Time: 1724967841',
+    'Program log: Price: 13981741499 ± 3495500 x 10^-8',
+    'Program log: Real Pyth data extracted successfully using official SDK',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K consumed 8671 of 124449 compute units',
+    'Program return: 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K success',
+    'Program log: Oracle CPI executed successfully for denom: SOL',
+    'Program log: Price received: 13981741499 for SOL',
+    'Program log: DEBUG - Collateral amount: 10000000000',
+    'Program log: DEBUG - Price: 13981741499',
+    'Program log: DEBUG - Price decimal: 8',
+    'Program log: DEBUG - Calculated collateral value: 1398174149900',
+    'Program log: DEBUG - Loan amount: 1045000000000000',
+    'Program log: DEBUG - Calculated ICR: 133796569368',
+    'Program log: DEBUG - Minimum ICR required: 115000000',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: Transfer',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4645 of 107935 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program log: ⚠ WARNING: No neighbor hints provided - skipping ICR ordering validation',
+    'Program log: ⚠ Production clients MUST provide neighbor hints for sorted list integrity',
+    'Program log: First trove for SOL - initializing L factors to 0',
+    'Program log: Initialized user L snapshots: l_debt=0, l_collateral=0',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: MintTo',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4500 of 99471 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program log: Processing protocol fee: 55000000000000 aUSD (5%)',
+    'Program log: Operation amount: 1100000000000000 aUSD',
+    'Program log: Distributing fee via aerospacer-fees contract CPI',
+    'Program log: Fee amount: 55000000000000 aUSD',
+    'Program log: Fees program: FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj',
+    'Program log: Fees state: 4wrrHgaTkv4vTERUMjmYXF2beaWZmPL2nCBvwht4VMZM',
+    'Program FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj invoke [2]',
+    'Program log: Instruction: DistributeFee',
+    'Program log: Distributing fee amount: 55000000000000',
+    'Program log: Total fees collected: 55002001076027',
+    'Program log: Validating fee address 1 token account owner',
+    'Program log: Expected owner: 6wcyhs5hYeAKJ9UHPqyNjABNuURyzPv1YUm2SYEQp2yk',
+    'Program log: Actual owner: 8Lv4UrYHTrzvg9jPVVGNmxWyMrMvrZnCQLWucBzfJyyR',
+    'Program log: AnchorError thrown in programs/aerospacer-fees/src/instructions/distribute_fee.rs:112. Error Code: InvalidFeeAddress1. Error Number: 6009. Error Message: Invalid fee address 1 - owner must match configured fee_address_1.',
+    'Program FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj consumed 14590 of 83231 compute units',
+    'Program FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj failed: custom program error: 0x1779',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 131359 of 200000 compute units',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0x1779'
+  ],
+  error: {
+    errorCode: { code: 'InvalidFeeAddress1', number: 6009 },
+    errorMessage: 'Invalid fee address 1 - owner must match configured fee_address_1',
+    comparedValues: undefined,
+    origin: {
+      file: 'programs/aerospacer-fees/src/instructions/distribute_fee.rs',
+      line: 112
+    }
+  },
+  _programErrorStack: ProgramErrorStack {
+    stack: [
+      [PublicKey [PublicKey(HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk)]],
+      [PublicKey [PublicKey(FyBGDrxVAdTnwKeXFrhQR1UyyJhqbfQmZrXWqZuhYkAj)]]
+    ]
+  }
+}
+      1) Should open a trove successfully
+✅ Minting additional collateral for add_collateral test...
+✅ Minted 15000000000 additional collateral tokens to user1
+  User1 raw balance: 25000000000 units
+  User1 UI balance: 25 tokens
+  Required amount: 15000000000 units
+  User1 raw balance: 25000000000 units
+  Required amount: 15000000000 units
+❌ Adding collateral failed: Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+    at AccountClient.fetch (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+      2) Should add collateral to existing trove
+❌ Borrowing additional loan failed: Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+    at AccountClient.fetch (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+      3) Should borrow additional loan from trove
+Staking stablecoins from user1's trove...
+❌ Staking failed: AnchorError: AnchorError thrown in programs/aerospacer-protocol/src/instructions/stake.rs:72. Error Code: InsufficientCollateral. Error Number: 6014. Error Message: Insufficient collateral.
+    at Function.parse (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+    at translateError (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+    at MethodsBuilder.rpc [as _rpcFn] (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  errorLogs: [
+    'Program log: AnchorError thrown in programs/aerospacer-protocol/src/instructions/stake.rs:72. Error Code: InsufficientCollateral. Error Number: 6014. Error Message: Insufficient collateral.'
+  ],
+  logs: [
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]',
+    'Program log: Instruction: Stake',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: InitializeAccount3',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 180826 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program log: AnchorError thrown in programs/aerospacer-protocol/src/instructions/stake.rs:72. Error Code: InsufficientCollateral. Error Number: 6014. Error Message: Insufficient collateral.',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 26839 of 200000 compute units',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0x177e'
+  ],
+  error: {
+    errorCode: { code: 'InsufficientCollateral', number: 6014 },
+    errorMessage: 'Insufficient collateral',
+    comparedValues: undefined,
+    origin: {
+      file: 'programs/aerospacer-protocol/src/instructions/stake.rs',
+      line: 72
+    }
+  },
+  _programErrorStack: ProgramErrorStack {
+    stack: [
+      [PublicKey [PublicKey(HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk)]]
+    ]
+  }
+}
+      4) Should stake stablecoins in stability pool
+❌ Second trove opening failed: AnchorError: AnchorError thrown in programs/aerospacer-protocol/src/trove_management.rs:81. Error Code: CollateralBelowMinimum. Error Number: 6013. Error Message: Collateral below minimum.
+    at Function.parse (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+    at translateError (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+    at MethodsBuilder.rpc [as _rpcFn] (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  errorLogs: [
+    'Program log: AnchorError thrown in programs/aerospacer-protocol/src/trove_management.rs:81. Error Code: CollateralBelowMinimum. Error Number: 6013. Error Message: Collateral below minimum.'
+  ],
+  logs: [
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]',
+    'Program log: Instruction: OpenTrove',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: InitializeAccount3',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 165104 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program 11111111111111111111111111111111 invoke [2]',
+    'Program 11111111111111111111111111111111 success',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]',
+    'Program log: Instruction: InitializeAccount3',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 134974 compute units',
+    'Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success',
+    'Program log: Opening fee: 100000000000000 aUSD (5%)',
+    'Program log: Net loan amount: 1900000000000000 aUSD',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K invoke [2]',
+    'Program log: Instruction: GetPrice',
+    'Program log: Price query successful',
+    'Program log: Denom: SOL',
+    'Program log: Decimal: 9',
+    'Program log: Publish Time: 1724967841',
+    'Program log: Price: 13981741499 ± 3495500 x 10^-8',
+    'Program log: Real Pyth data extracted successfully using official SDK',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K consumed 8671 of 124437 compute units',
+    'Program return: 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////',
+    'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K success',
+    'Program log: Oracle CPI executed successfully for denom: SOL',
+    'Program log: Price received: 13981741499 for SOL',
+    'Program log: DEBUG - Collateral amount: 1000000',
+    'Program log: DEBUG - Price: 13981741499',
+    'Program log: DEBUG - Price decimal: 8',
+    'Program log: DEBUG - Calculated collateral value: 139817414',
+    'Program log: DEBUG - Loan amount: 1900000000000000',
+    'Program log: DEBUG - Calculated ICR: 7358811',
+    'Program log: DEBUG - Minimum ICR required: 115000000',
+    'Program log: AnchorError thrown in programs/aerospacer-protocol/src/trove_management.rs:81. Error Code: CollateralBelowMinimum. Error Number: 6013. Error Message: Collateral below minimum.',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 92198 of 200000 compute units',
+    'Program return: HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0x177d'
+  ],
+  error: {
+    errorCode: { code: 'CollateralBelowMinimum', number: 6013 },
+    errorMessage: 'Collateral below minimum',
+    comparedValues: undefined,
+    origin: {
+      file: 'programs/aerospacer-protocol/src/trove_management.rs',
+      line: 81
+    }
+  },
+  _programErrorStack: ProgramErrorStack {
+    stack: [
+      [PublicKey [PublicKey(HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk)]]
+    ]
+  }
+}
+      5) Should open a second trove for user2
+❌ Loan repayment failed: Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+    at AccountClient.fetch (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+      6) Should repay loan partially
+❌ Removing collateral failed: Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+    at AccountClient.fetch (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+      7) Should remove collateral from trove
+❌ Unstaking failed: AnchorError: AnchorError caused by account: user_stake_amount. Error Code: AccountNotInitialized. Error Number: 3012. Error Message: The program expected this account to be already initialized.
+    at Function.parse (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:168:14)
+    at translateError (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+    at MethodsBuilder.rpc [as _rpcFn] (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  errorLogs: [
+    'Program log: AnchorError caused by account: user_stake_amount. Error Code: AccountNotInitialized. Error Number: 3012. Error Message: The program expected this account to be already initialized.'
+  ],
+  logs: [
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]',
+    'Program log: Instruction: Unstake',
+    'Program log: AnchorError caused by account: user_stake_amount. Error Code: AccountNotInitialized. Error Number: 3012. Error Message: The program expected this account to be already initialized.',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 4005 of 200000 compute units',
+    'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0xbc4'
+  ],
+  error: {
+    errorCode: { code: 'AccountNotInitialized', number: 3012 },
+    errorMessage: 'The program expected this account to be already initialized',
+    comparedValues: undefined,
+    origin: 'user_stake_amount'
+  },
+  _programErrorStack: ProgramErrorStack {
+    stack: [
+      [PublicKey [PublicKey(HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk)]]
+    ]
+  }
+}
+      8) Should unstake stablecoins from stability pool
+    Protocol State Verification
+📊 Protocol State:
+- Total Debt Amount: 0
+- Total Collateral Amount: 0
+- Total Stake Amount: 0
+- Minimum Collateral Ratio: 115000000
+- Protocol Fee: 5
+❌ Protocol state verification failed: AssertionError: Total debt should be greater than 0
+    at /home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/tests/protocol-core.ts:1051:15
+    at Generator.next (<anonymous>)
+    at fulfilled (/home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/tests/protocol-core.ts:38:58)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  showDiff: false,
+  actual: null,
+  expected: undefined,
+  operator: 'strictEqual'
+}
+      9) Should verify protocol state after operations
+⚠️  User debt account does not exist - skipping verification
+      ✔ Should verify user trove state (294ms)
+⚠️  User stake account does not exist - skipping verification
+      ✔ Should verify user stake state (409ms)
+
+
+  2 passing (2m)
+  9 failing
+
+  1) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should open a trove successfully:
+     Error: AnchorError thrown in programs/aerospacer-fees/src/instructions/distribute_fee.rs:112. Error Code: InvalidFeeAddress1. Error Number: 6009. Error Message: Invalid fee address 1 - owner must match configured fee_address_1.
+      at Function.parse (node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+      at translateError (node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+      at MethodsBuilder.rpc [as _rpcFn] (node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  2) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should add collateral to existing trove:
+     Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+      at AccountClient.fetch (node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  3) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should borrow additional loan from trove:
+     Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+      at AccountClient.fetch (node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  4) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should stake stablecoins in stability pool:
+     Error: AnchorError thrown in programs/aerospacer-protocol/src/instructions/stake.rs:72. Error Code: InsufficientCollateral. Error Number: 6014. Error Message: Insufficient collateral.
+      at Function.parse (node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+      at translateError (node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+      at MethodsBuilder.rpc [as _rpcFn] (node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  5) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should open a second trove for user2:
+     Error: AnchorError thrown in programs/aerospacer-protocol/src/trove_management.rs:81. Error Code: CollateralBelowMinimum. Error Number: 6013. Error Message: Collateral below minimum.
+      at Function.parse (node_modules/@coral-xyz/anchor/src/error.ts:152:14)
+      at translateError (node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+      at MethodsBuilder.rpc [as _rpcFn] (node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  6) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should repay loan partially:
+     Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+      at AccountClient.fetch (node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  7) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should remove collateral from trove:
+     Error: Account does not exist or has no data HtWsV3iSxXePAcDpaC8vMDXtZZ6yD6XCwTjC4qPQHSkE
+      at AccountClient.fetch (node_modules/@coral-xyz/anchor/src/program/namespace/account.ts:168:13)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  8) Aeroscraper Protocol Core Operations
+       Core Protocol Operations
+         Should unstake stablecoins from stability pool:
+     Error: AnchorError caused by account: user_stake_amount. Error Code: AccountNotInitialized. Error Number: 3012. Error Message: The program expected this account to be already initialized.
+      at Function.parse (node_modules/@coral-xyz/anchor/src/error.ts:168:14)
+      at translateError (node_modules/@coral-xyz/anchor/src/error.ts:277:35)
+      at MethodsBuilder.rpc [as _rpcFn] (node_modules/@coral-xyz/anchor/src/program/namespace/rpc.ts:35:29)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+  9) Aeroscraper Protocol Core Operations
+       Protocol State Verification
+         Should verify protocol state after operations:
+     AssertionError: Total debt should be greater than 0
+      at /home/taha/Documents/Projects/Aeroscraper/aeroscraper-contracts/tests/protocol-core.ts:1051:15
+      at Generator.next (<anonymous>)
+      at fulfilled (tests/protocol-core.ts:38:58)
+      at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+
+
+taha@HP-Probook:~/Documents/Projects/Aeroscraper/aeroscraper-contracts$ 

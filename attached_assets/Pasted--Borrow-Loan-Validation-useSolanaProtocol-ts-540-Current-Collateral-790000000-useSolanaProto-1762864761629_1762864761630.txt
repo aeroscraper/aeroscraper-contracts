@@ -1,0 +1,92 @@
+📊 Borrow Loan Validation:
+useSolanaProtocol.ts:540   - Current Collateral: 790000000
+useSolanaProtocol.ts:541   - Current Debt: 39500000000000000
+useSolanaProtocol.ts:542   - Borrowing Amount: 20000000000000000000
+useSolanaProtocol.ts:543   - Fee Amount: 1000000000000000000
+useSolanaProtocol.ts:544   - Net Loan Amount: 19000000000000000000
+useSolanaProtocol.ts:545   - New Total Debt: 20039500000000000000
+useSolanaProtocol.ts:546   - Estimated New ICR: 551.91 %
+useSolanaProtocol.ts:547   - Minimum ICR Required: 115 %
+getNeighborHints.ts:34 [neighborHints] total troves: 0
+getNeighborHints.ts:38 [neighborHints] top-5 sorted ICRs (micro-%):
+getNeighborHints.ts:53 [neighborHints] new trove params: {user: '8gn94gQopSaw6dcF2xBBi8UDTNd7zcjxoKnPdERud9SC', collateralAmount: 790000000, loanAmount: '20039500000000000000', estimatedSolPrice: '100', newICR: '0'}
+getNeighborHints.ts:79 [neighborHints] insertIndex: -1 finalIndex: 0
+getNeighborHints.ts:89 [neighborHints] neighbors: {prev: null, next: null}
+getNeighborHints.ts:107 [neighborHints] at head → returning no hints to avoid misinterpretation
+useSolanaProtocol.ts:562   - Neighbor Hints: 0
+buildInstructions.ts:376 🔨 Building borrow_loan instruction...
+buildInstructions.ts:377   - Loan amount: 20000000000000000000
+buildInstructions.ts:465 ✅ borrow_loan instruction built
+buildInstructions.ts:466 📊 Total accounts: 23
+useSolanaProtocol.ts:579 ✅ Instruction built, creating transaction...
+useSolanaProtocol.ts:590 🔍 Simulating borrow_loan transaction...
+useSolanaProtocol.ts:592 📊 Simulation result:
+useSolanaProtocol.ts:593   - Error: {InstructionError: Array(2)}
+useSolanaProtocol.ts:594   - Logs: (19) ['Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]', 'Program log: Instruction: BorrowLoan', 'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K invoke [2]', 'Program log: Instruction: GetPrice', 'Program log: Price query successful', 'Program log: Denom: SOL', 'Program log: Decimal: 9', 'Program log: Publish Time: 1724967841', 'Program log: Price: 13981741499 ± 3495500 x 10^-8', 'Program log: Real Pyth data extracted successfully using official SDK', 'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K consumed 8671 of 156813 compute units', 'Program return: 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiK… AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////', 'Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K success', 'Program log: Oracle CPI executed successfully for denom: SOL', 'Program log: Price received: 13981741499 for SOL', 'Program log: AnchorError thrown in programs/aerosp…r: 6013. Error Message: Collateral below minimum.', 'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 56884 of 200000 compute units', 'Program return: HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJ… AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////', 'Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0x177d']0: "Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk invoke [1]"1: "Program log: Instruction: BorrowLoan"2: "Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K invoke [2]"3: "Program log: Instruction: GetPrice"4: "Program log: Price query successful"5: "Program log: Denom: SOL"6: "Program log: Decimal: 9"7: "Program log: Publish Time: 1724967841"8: "Program log: Price: 13981741499 ± 3495500 x 10^-8"9: "Program log: Real Pyth data extracted successfully using official SDK"10: "Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K consumed 8671 of 156813 compute units"11: "Program return: 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////"12: "Program 8Fu4YnUkfmrGQ3PTVoPfsAGjQ6NistGsiKpBEkPhzA2K success"13: "Program log: Oracle CPI executed successfully for denom: SOL"14: "Program log: Price received: 13981741499 for SOL"15: "Program log: AnchorError thrown in programs/aerospacer-protocol/src/trove_management.rs:297. Error Code: CollateralBelowMinimum. Error Number: 6013. Error Message: Collateral below minimum."16: "Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk consumed 56884 of 200000 compute units"17: "Program return: HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk AwAAAFNPTLtxYEEDAAAACKHr0GYAAAAATFY1AAAAAAD4////"18: "Program HQbV7SKnWuWPHEci5eejsnJG7qwYuQkGzJHJ6nhLZhxk failed: custom program error: 0x177d"length: 19[[Prototype]]: Array(0)
+useSolanaProtocol.ts:595   - Units consumed: 56884
+useSolanaProtocol.ts:598 ❌ Simulation failed: {InstructionError: Array(2)}
+window.console.error @ app-index.js:32
+console.error @ hydration-error-info.js:41
+borrowLoan @ useSolanaProtocol.ts:598
+await in borrowLoan
+handleBorrowLoan @ TroveTab.tsx:615
+await in handleBorrowLoan
+callCallback @ react-dom.development.js:19449
+invokeGuardedCallbackImpl @ react-dom.development.js:19498
+invokeGuardedCallback @ react-dom.development.js:19573
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:19587
+executeDispatch @ react-dom.development.js:30622
+processDispatchQueueItemsInOrder @ react-dom.development.js:30654
+processDispatchQueue @ react-dom.development.js:30667
+dispatchEventsForPlugins @ react-dom.development.js:30678
+eval @ react-dom.development.js:30868
+batchedUpdates$1 @ react-dom.development.js:23765
+batchedUpdates @ react-dom.development.js:27584
+dispatchEventForPluginEventSystem @ react-dom.development.js:30867
+dispatchEvent @ react-dom.development.js:28640
+dispatchDiscreteEvent @ react-dom.development.js:28611
+useSolanaProtocol.ts:620 ❌ Borrow loan error: Error: Transaction simulation failed: {"InstructionError":[0,{"Custom":6013}]}
+    at borrowLoan (useSolanaProtocol.ts:599:23)
+    at async handleBorrowLoan (TroveTab.tsx:615:25)
+window.console.error @ app-index.js:32
+console.error @ hydration-error-info.js:41
+borrowLoan @ useSolanaProtocol.ts:620
+await in borrowLoan
+handleBorrowLoan @ TroveTab.tsx:615
+await in handleBorrowLoan
+callCallback @ react-dom.development.js:19449
+invokeGuardedCallbackImpl @ react-dom.development.js:19498
+invokeGuardedCallback @ react-dom.development.js:19573
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:19587
+executeDispatch @ react-dom.development.js:30622
+processDispatchQueueItemsInOrder @ react-dom.development.js:30654
+processDispatchQueue @ react-dom.development.js:30667
+dispatchEventsForPlugins @ react-dom.development.js:30678
+eval @ react-dom.development.js:30868
+batchedUpdates$1 @ react-dom.development.js:23765
+batchedUpdates @ react-dom.development.js:27584
+dispatchEventForPluginEventSystem @ react-dom.development.js:30867
+dispatchEvent @ react-dom.development.js:28640
+dispatchDiscreteEvent @ react-dom.development.js:28611
+TroveTab.tsx:636 Error: Transaction simulation failed: {"InstructionError":[0,{"Custom":6013}]}
+    at borrowLoan (useSolanaProtocol.ts:599:23)
+    at async handleBorrowLoan (TroveTab.tsx:615:25)
+window.console.error @ app-index.js:32
+console.error @ hydration-error-info.js:41
+handleBorrowLoan @ TroveTab.tsx:636
+await in handleBorrowLoan
+callCallback @ react-dom.development.js:19449
+invokeGuardedCallbackImpl @ react-dom.development.js:19498
+invokeGuardedCallback @ react-dom.development.js:19573
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:19587
+executeDispatch @ react-dom.development.js:30622
+processDispatchQueueItemsInOrder @ react-dom.development.js:30654
+processDispatchQueue @ react-dom.development.js:30667
+dispatchEventsForPlugins @ react-dom.development.js:30678
+eval @ react-dom.development.js:30868
+batchedUpdates$1 @ react-dom.development.js:23765
+batchedUpdates @ react-dom.development.js:27584
+dispatchEventForPluginEventSystem @ react-dom.development.js:30867
+dispatchEvent @ react-dom.development.js:28640
+dispatchDiscreteEvent @ react-dom.development.js:28611
+33TroveTab.tsx:182 [BorrowingCapacity] Calculated {"collateralSol":0.79,"oracleSolPrice":163.92,"maxDebtAtMinimumRatio":112.60591304347827,"currentDebtAusd":0.0395,"capacity":112.56641304347826}
